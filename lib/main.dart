@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '/screens/chat_screen.dart';
+import 'package:social_chat_app/screens/user_screen.dart';
+import 'package:social_chat_app/widgets/chat/messages.dart';
 import '/screens/auth_screen.dart';
 
 Future<void> main() async {
@@ -23,17 +24,18 @@ class MainApp extends StatelessWidget {
           primarySwatch: Colors.deepPurple,
         ),
       ),
-      home: Scaffold(
-        body: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (ctx, streamSnapshot) {
-            if (streamSnapshot.data != null) {
-              return const ChatScreen();
-            }
-            return const AuthScreen();
-          },
-        ),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (ctx, streamSnapshot) {
+          if (streamSnapshot.data != null) {
+            return const UserScreen();
+          }
+          return const AuthScreen();
+        },
       ),
+      routes: {
+        Messages.routeName: (context) => Messages(),
+      },
     );
   }
 }

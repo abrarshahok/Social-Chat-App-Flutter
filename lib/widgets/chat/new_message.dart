@@ -3,6 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class NewMessage extends StatefulWidget {
+  final String currentUserId;
+  final String friendUserId;
+
+  const NewMessage({
+    super.key,
+    required this.currentUserId,
+    required this.friendUserId,
+  });
   @override
   State<NewMessage> createState() => _NewMessageState();
 }
@@ -10,6 +18,13 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   final messageController = TextEditingController();
   String enteredMessage = '';
+  
+  String get chatRoomId {
+    if (widget.currentUserId.compareTo(widget.friendUserId) > 0) {
+      return '${widget.currentUserId}-${widget.friendUserId}';
+    }
+    return '${widget.friendUserId}-${widget.currentUserId}';
+  }
 
   void _sendMessage() async {
     FocusScope.of(context).unfocus();
@@ -18,13 +33,18 @@ class _NewMessageState extends State<NewMessage> {
         .collection('users')
         .doc(user!.uid)
         .get();
-    FirebaseFirestore.instance.collection('chat').add({
-      'username': userData['username'],
-      'userId': user.uid,
-      'time': Timestamp.now(),
-      'text': enteredMessage,
-      'image_url': userData['image_url'],
-    });
+    FirebaseFirestore.instance
+        .collection('chatRoom')
+        .doc(chatRoomId)
+        .collection('messages')
+        .add(
+      {
+        'senderId': widget.currentUserId,
+        'text': enteredMessage,
+        'image_url': userData['image_url'],
+        'time': Timestamp.now(),
+      },
+    );
     messageController.clear();
   }
 
